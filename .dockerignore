@@ -1,0 +1,15 @@
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.git
+.gitignore
+.env
+venv/
+.venv/
+dataset_master.csv
+*_backup.joblib
+CEAS_08.csv/
+Phishing_Email.csv/
+.system_generated/
+*.log

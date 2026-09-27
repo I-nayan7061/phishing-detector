@@ -416,6 +416,10 @@ function renderResults(data) {
   DOM.tokenHeatmapContainer.innerHTML = '';
   if (data.heatmap_tokens && data.heatmap_tokens.length > 0) {
     data.heatmap_tokens.forEach(t => {
+      if (t.type === 'newline') {
+        DOM.tokenHeatmapContainer.appendChild(document.createElement('br'));
+        return;
+      }
       const span = document.createElement('span');
       span.className = `heatmap-token token-${t.type}`;
       span.textContent = t.token;
@@ -425,6 +429,7 @@ function renderResults(data) {
   } else {
     DOM.tokenHeatmapContainer.innerHTML = '<span class="token-neutral">No token attribution available.</span>';
   }
+
 
   // Top Features
   DOM.topFeaturesPills.innerHTML = '';
