@@ -3,15 +3,16 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Phishing Sentinel — AI Threat Detection Engine</title>
-  <meta name="description" content="Production-ready AI phishing email detection system with 99.3% accuracy powered by LinearSVC and TF-IDF NLP." />
+  <title>Phishing Sentinel — Multi-Modal Threat Detection & MLOps Platform</title>
+  <meta name="description" content="Enterprise-grade AI phishing detection platform supporting all document types (.eml, .pdf, images, docx), deep link unmasking, explainable SVM heatmaps, and dataset MLOps retraining." />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="/static/css/style.css" />
+  <link rel="stylesheet" href="/static/css/style.css?v=2.1" />
 </head>
+
 <body>
-  <!-- Ambient background glow effect -->
+  <!-- Ambient background glow effects -->
   <div class="ambient-glow glow-1"></div>
   <div class="ambient-glow glow-2"></div>
 
@@ -27,22 +28,34 @@
         </div>
         <div>
           <h1 class="brand-title">Phishing Sentinel</h1>
-          <p class="brand-subtitle">AI Cybersecurity Email Intelligence</p>
+          <p class="brand-subtitle">Universal Multi-Modal Threat & MLOps Engine</p>
         </div>
       </div>
 
+      <!-- Navigation Tabs -->
+      <nav class="nav-tabs" role="tablist">
+        <button type="button" class="nav-tab active" id="tabScannerBtn" data-target="scannerTab">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="2" y="4" width="20" height="16" rx="2"/>
+            <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/>
+          </svg>
+          <span>Threat Scanner</span>
+        </button>
+        <button type="button" class="nav-tab" id="tabDataHubBtn" data-target="dataHubTab">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <ellipse cx="12" cy="5" rx="9" ry="3"/>
+            <path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/>
+            <path d="M3 12c0 1.66 4 3 9 3s9-1.34 9-3"/>
+          </svg>
+          <span>Data & Model Hub</span>
+        </button>
+      </nav>
+
+      <!-- Right Header Status Badges -->
       <div class="header-badges">
         <div class="badge status-badge" id="systemStatusBadge">
           <span class="status-dot"></span>
-          <span id="systemStatusText">Connecting...</span>
-        </div>
-        <div class="badge metric-badge">
-          <span class="badge-label">Model Accuracy</span>
-          <strong class="badge-value">99.3%</strong>
-        </div>
-        <div class="badge metric-badge">
-          <span class="badge-label">Training Corpus</span>
-          <strong class="badge-value">56,000+</strong>
+          <span id="systemStatusText">Active</span>
         </div>
         <a href="/docs" target="_blank" class="api-docs-link" title="Open Swagger API Documentation">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -50,7 +63,6 @@
             <polyline points="14 2 14 8 20 8"/>
             <line x1="16" y1="13" x2="8" y2="13"/>
             <line x1="16" y1="17" x2="8" y2="17"/>
-            <polyline points="10 9 9 9 8 9"/>
           </svg>
           <span>REST API</span>
         </a>
@@ -60,239 +72,485 @@
 
   <!-- Main Container -->
   <main class="container main-content">
-    
-    <!-- Top Hero Notice -->
-    <section class="banner-card">
-      <div class="banner-content">
-        <div class="banner-chip">PRODUCTION NLP PIPELINE</div>
-        <h2>Enterprise Email Threat Detection & Heuristic Telemetry</h2>
-        <p>
-          Analyze suspected emails in real time using our dual-layer security engine: Calibrated Support Vector Classifier 
-          vectorized with 15,000 n-gram features combined with heuristic behavioral analysis.
-        </p>
-      </div>
-    </section>
 
-    <!-- App Split Layout -->
-    <div class="app-layout">
-      
-      <!-- Left Column: Input Console -->
-      <section class="panel input-panel">
-        <div class="panel-header">
-          <div class="panel-title-wrap">
-            <svg class="panel-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <rect x="2" y="4" width="20" height="16" rx="2"/>
-              <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/>
-            </svg>
-            <h3>Email Inspector Console</h3>
+    <!-- ================================================================= -->
+    <!-- TAB 1: THREAT SCANNER -->
+    <!-- ================================================================= -->
+    <div id="scannerTab" class="tab-pane active">
+
+      <!-- App Split Layout -->
+      <div class="app-layout">
+        
+        <!-- Left Column: Input Console -->
+        <section class="panel input-panel">
+          <div class="panel-header">
+            <div class="panel-title-wrap">
+              <svg class="panel-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="11" cy="11" r="8"/>
+                <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+              </svg>
+              <h3>Multi-Modal Ingestion Console</h3>
+            </div>
+            
+            <!-- Ingestion Mode Selector (Text / File) -->
+            <div class="input-mode-switch">
+              <button type="button" class="mode-btn active" id="modeTextBtn">Paste Text / HTML</button>
+              <button type="button" class="mode-btn" id="modeFileBtn">Upload File</button>
+            </div>
           </div>
-          <div class="quick-presets">
+
+          <!-- Sensitivity Threshold Controller -->
+          <div class="sensitivity-card">
+            <div class="sensitivity-header">
+              <div class="sensitivity-label-wrap">
+                <span class="sensitivity-title">Detection Sensitivity:</span>
+                <strong id="sensitivityValueLabel" class="sensitivity-val">Balanced (0.50)</strong>
+              </div>
+              <div class="preset-buttons">
+                <button type="button" class="preset-btn" data-sens="0.35">Strict (0.35)</button>
+                <button type="button" class="preset-btn active" data-sens="0.50">Balanced (0.50)</button>
+                <button type="button" class="preset-btn" data-sens="0.70">Relaxed (0.70)</button>
+              </div>
+            </div>
+            <input type="range" id="sensitivitySlider" min="0.10" max="0.90" step="0.05" value="0.50" class="sensitivity-range" />
+          </div>
+
+          <!-- Quick Test Scenarios -->
+          <div class="quick-presets" id="scenariosRow">
             <span class="preset-label">Test Scenarios:</span>
             <div class="preset-pills" id="presetPillsContainer">
-              <!-- Dynamically populated or static fallback -->
-              <button type="button" class="preset-pill" data-preset="urgent_suspension">Urgent Suspension</button>
-              <button type="button" class="preset-pill" data-preset="lottery_crypto">Crypto Prize</button>
-              <button type="button" class="preset-pill" data-preset="safe_meeting">Safe Retrospective</button>
-              <button type="button" class="preset-pill" data-preset="safe_shipping">Order Shipped</button>
-            </div>
-          </div>
-        </div>
-
-        <form id="emailForm" class="email-form">
-          <div class="input-wrapper">
-            <textarea
-              id="emailInput"
-              class="email-textarea"
-              placeholder="Paste email headers, subject line, and body content here for automated security scanning..."
-              rows="12"
-              required
-            ></textarea>
-
-            <div class="textarea-footer">
-              <div class="counts">
-                <span id="charCount">0 characters</span>
-                <span class="count-separator">•</span>
-                <span id="wordCount">0 words</span>
-              </div>
-              <div class="textarea-actions">
-                <button type="button" id="pasteBtn" class="btn-ghost" title="Paste from clipboard">
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <rect x="8" y="2" width="8" height="4" rx="1" ry="1"/>
-                    <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/>
-                  </svg>
-                  Paste
-                </button>
-                <button type="button" id="clearBtn" class="btn-ghost" title="Clear text area">
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <polyline points="3 6 5 6 21 6"/>
-                    <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
-                  </svg>
-                  Clear
-                </button>
-              </div>
+              <button type="button" class="preset-pill" data-preset="masked_click_here">Masked 'Click Here'</button>
+              <button type="button" class="preset-pill" data-preset="domain_spoof_mismatch">Domain Spoofing</button>
+              <button type="button" class="preset-pill" data-preset="zero_width_evasion">Zero-Width Evasion</button>
+              <button type="button" class="preset-pill" data-preset="safe_sprint_retro">Safe Retrospective</button>
             </div>
           </div>
 
-          <div class="form-action-bar">
-            <div class="keyboard-tip">
-              <kbd>Ctrl</kbd> + <kbd>Enter</kbd> to quickly scan
+          <!-- Mode 1: Text Input Form -->
+          <form id="emailForm" class="email-form">
+            <div class="input-wrapper">
+              <textarea
+                id="emailInput"
+                class="email-textarea"
+                placeholder="Paste email headers, body content, raw HTML with &lt;a href&gt; tags, or message text here for deep security analysis..."
+                rows="11"
+              ></textarea>
+
+              <div class="textarea-footer">
+                <div class="counts">
+                  <span id="charCount">0 characters</span>
+                  <span class="count-separator">•</span>
+                  <span id="wordCount">0 words</span>
+                </div>
+                <div class="textarea-actions">
+                  <button type="button" id="pasteBtn" class="btn-ghost" title="Paste from clipboard">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <rect x="8" y="2" width="8" height="4" rx="1" ry="1"/>
+                      <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/>
+                    </svg>
+                    Paste
+                  </button>
+                  <button type="button" id="clearBtn" class="btn-ghost" title="Clear text area">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <polyline points="3 6 5 6 21 6"/>
+                      <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+                    </svg>
+                    Clear
+                  </button>
+                </div>
+              </div>
             </div>
-            <button type="submit" id="scanBtn" class="btn-primary">
-              <span class="btn-text">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                  <circle cx="11" cy="11" r="8"/>
-                  <line x1="21" y1="21" x2="16.65" y2="16.65"/>
-                  <line x1="11" y1="8" x2="11" y2="14"/>
-                  <line x1="8" y1="11" x2="14" y2="11"/>
+
+            <div class="form-action-bar">
+              <div class="keyboard-tip">
+                <kbd>Ctrl</kbd> + <kbd>Enter</kbd> to execute scan
+              </div>
+              <button type="submit" id="scanBtn" class="btn-primary">
+                <span class="btn-text">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="11" cy="11" r="8"/>
+                    <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+                  </svg>
+                  Scan Threat
+                </span>
+                <span class="btn-spinner hidden"></span>
+              </button>
+            </div>
+          </form>
+
+          <!-- Mode 2: Multi-Modal Universal File Upload -->
+          <div id="fileUploadContainer" class="file-upload-container hidden">
+            <div class="dropzone" id="fileDropzone">
+              <input type="file" id="universalFileInput" class="file-input-hidden" accept=".eml,.msg,.mbox,.pdf,.docx,.doc,.rtf,.xlsx,.xls,.csv,.html,.htm,.txt,.json,.png,.jpg,.jpeg,.webp,.bmp" />
+              <div class="dropzone-content">
+                <div class="dropzone-icon">
+                  <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                    <polyline points="17 8 12 3 7 8"/>
+                    <line x1="12" y1="3" x2="12" y2="15"/>
+                  </svg>
+                </div>
+                <h4>Drag & Drop any Document, Email, or Image</h4>
+                <p class="dropzone-sub">
+                  Supports <strong>.eml, .msg, .pdf, .docx, .xlsx, .html, .png, .jpg, .txt</strong>
+                </p>
+                <button type="button" class="btn-secondary" id="browseFileBtn">Browse Local File</button>
+              </div>
+            </div>
+
+            <!-- Selected File Badge -->
+            <div id="selectedFileCard" class="selected-file-card hidden">
+              <div class="selected-file-info">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                  <polyline points="14 2 14 8 20 8"/>
                 </svg>
-                Scan Email Threat
-              </span>
-              <span class="btn-spinner hidden"></span>
+                <div>
+                  <strong id="selectedFileName">filename.pdf</strong>
+                  <span id="selectedFileSize" class="file-size-tag">0 KB</span>
+                </div>
+              </div>
+              <button type="button" id="removeFileBtn" class="btn-ghost-danger" title="Remove file">✕</button>
+            </div>
+
+            <div class="file-action-bar">
+              <button type="button" id="scanFileBtn" class="btn-primary full-width" disabled>
+                <span class="btn-text">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="11" cy="11" r="8"/>
+                    <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+                  </svg>
+                  Scan Document Threat
+                </span>
+                <span class="btn-spinner hidden"></span>
+              </button>
+            </div>
+          </div>
+        </section>
+
+        <!-- Right Column: Results & Telemetry -->
+        <section class="panel results-panel">
+          <div class="panel-header">
+            <div class="panel-title-wrap">
+              <svg class="panel-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M22 12h-4l-3 9L9 3l-3 9H2"/>
+              </svg>
+              <h3>Threat Intelligence Telemetry</h3>
+            </div>
+            <button id="copyReportBtn" class="btn-ghost hidden" title="Copy analysis report">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/>
+                <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
+              </svg>
+              Copy Report
             </button>
           </div>
-        </form>
-      </section>
 
-      <!-- Right Column: Results & Telemetry -->
-      <section class="panel results-panel">
-        <div class="panel-header">
-          <div class="panel-title-wrap">
-            <svg class="panel-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M22 12h-4l-3 9L9 3l-3 9H2"/>
-            </svg>
-            <h3>Threat Intelligence Telemetry</h3>
-          </div>
-          <button id="copyReportBtn" class="btn-ghost hidden" title="Copy full analysis report">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/>
-              <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
-            </svg>
-            Copy Report
-          </button>
-        </div>
-
-        <!-- Initial Placeholder State -->
-        <div id="emptyState" class="result-placeholder">
-          <div class="radar-scan-animation">
-            <div class="radar-circle circle-1"></div>
-            <div class="radar-circle circle-2"></div>
-            <div class="radar-circle circle-3"></div>
-            <div class="radar-crosshair"></div>
-          </div>
-          <h4>Awaiting Email Payload</h4>
-          <p>Paste email text on the left or select a preset scenario to evaluate risk indicators and ML classifications.</p>
-        </div>
-
-        <!-- Dynamic Results Container -->
-        <div id="resultsContainer" class="results-container hidden">
-          
-          <!-- Verdict Card Banner -->
-          <div id="verdictCard" class="verdict-card">
-            <div class="verdict-icon-wrap" id="verdictIconWrap">
-              <!-- SVG icon updated via JS -->
+          <!-- Initial Placeholder State -->
+          <div id="emptyState" class="result-placeholder">
+            <div class="radar-scan-animation">
+              <div class="radar-circle circle-1"></div>
+              <div class="radar-circle circle-2"></div>
+              <div class="radar-circle circle-3"></div>
+              <div class="radar-crosshair"></div>
             </div>
-            <div class="verdict-details">
-              <div class="verdict-meta">
-                <span class="verdict-tag" id="riskLevelTag">CRITICAL</span>
-                <span class="latency-tag" id="latencyTag">4.2 ms</span>
-              </div>
-              <h2 class="verdict-title" id="verdictTitle">PHISHING DETECTED</h2>
-              <p class="verdict-description" id="verdictDesc">
-                This email exhibits malicious characteristics commonly used in phishing attacks.
-              </p>
-            </div>
+            <h4>Awaiting Input Payload</h4>
+            <p>Paste email text or drop any document on the left to evaluate threat heuristics and explainable SVM predictions.</p>
           </div>
 
-          <!-- Risk Score Gauge & Metrics Grid -->
-          <div class="analytics-row">
-            <div class="gauge-card">
-              <div class="gauge-header">
-                <span class="card-caption">PHISHING RISK PROBABILITY</span>
-                <strong id="probPercentage" class="gauge-percentage">98.4%</strong>
-              </div>
-              <div class="gauge-bar-track">
-                <div id="gaugeBarFill" class="gauge-bar-fill" style="width: 0%"></div>
-              </div>
-              <div class="gauge-ticks">
-                <span>0% Safe</span>
-                <span>50% Suspicious</span>
-                <span>100% Malicious</span>
+          <!-- Dynamic Results Container -->
+          <div id="resultsContainer" class="results-container hidden">
+            
+            <!-- Verdict Card Banner -->
+            <div id="verdictCard" class="verdict-card">
+              <div class="verdict-icon-wrap" id="verdictIconWrap"></div>
+              <div class="verdict-details">
+                <div class="verdict-meta">
+                  <span class="verdict-tag" id="riskLevelTag">CRITICAL</span>
+                  <span class="latency-tag" id="latencyTag">0.0 ms</span>
+                </div>
+                <h2 class="verdict-title" id="verdictTitle">PHISHING DETECTED</h2>
+                <p class="verdict-description" id="verdictDesc">
+                  High-risk indicators and machine learning features identified.
+                </p>
               </div>
             </div>
 
-            <div class="metrics-grid">
-              <div class="metric-box">
-                <span class="metric-label">Model Confidence</span>
-                <strong class="metric-val" id="metricConfidence">--</strong>
+            <!-- Risk Score Gauge & Metrics Grid -->
+            <div class="analytics-row">
+              <div class="gauge-card">
+                <div class="gauge-header">
+                  <span class="card-caption">PHISHING RISK PROBABILITY</span>
+                  <strong id="probPercentage" class="gauge-percentage">0.0%</strong>
+                </div>
+                <div class="gauge-bar-track">
+                  <div id="gaugeBarFill" class="gauge-bar-fill" style="width: 0%"></div>
+                </div>
+                <div class="gauge-ticks">
+                  <span>0% Safe</span>
+                  <span id="thresholdMarker">50% Threshold</span>
+                  <span>100% Malicious</span>
+                </div>
               </div>
-              <div class="metric-box">
-                <span class="metric-label">Classification</span>
-                <strong class="metric-val" id="metricClassification">--</strong>
+
+              <div class="metrics-grid">
+                <div class="metric-box">
+                  <span class="metric-label">Model Confidence</span>
+                  <strong class="metric-val" id="metricConfidence">--</strong>
+                </div>
+                <div class="metric-box">
+                  <span class="metric-label">Active Threshold</span>
+                  <strong class="metric-val" id="metricThreshold">0.50</strong>
+                </div>
               </div>
             </div>
-          </div>
 
-          <!-- Detected Threat Signals / Heuristics -->
-          <div class="signals-section">
-            <h4 class="section-title">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/>
-                <line x1="12" y1="9" x2="12" y2="13"/>
-                <line x1="12" y1="17" x2="12.01" y2="17"/>
-              </svg>
-              Behavioral Threat Indicators
-            </h4>
-            <div id="signalsList" class="signals-list">
-              <!-- Dynamically populated signals -->
+            <!-- EXPLAINABLE AI: Word Attribution Heatmap -->
+            <div class="xai-section" id="xaiSection">
+              <div class="xai-header">
+                <h4 class="section-title">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <polygon points="12 2 2 7 12 12 22 7 12 2"/>
+                    <polyline points="2 17 12 22 22 17"/>
+                    <polyline points="2 12 12 17 22 12"/>
+                  </svg>
+                  Native SVM Explainability (Token Attribution Heatmap)
+                </h4>
+                <div class="heatmap-legend">
+                  <span class="legend-badge legend-phish">Phishing Signal</span>
+                  <span class="legend-badge legend-safe">Legitimate Signal</span>
+                </div>
+              </div>
+              <p class="xai-sub">Words highlighted in soft red push the SVM toward Phishing; words in green indicate legitimate phrasing.</p>
+              <div id="tokenHeatmapContainer" class="token-heatmap-container">
+                <!-- Word tokens rendered here -->
+              </div>
+
+              <!-- Top Driving Features -->
+              <div class="top-features-wrap">
+                <span class="top-features-title">Top 5 Influential Model Features:</span>
+                <div id="topFeaturesPills" class="top-features-pills"></div>
+              </div>
             </div>
-          </div>
 
-          <!-- Extracted URLs section -->
-          <div id="urlsSection" class="urls-section hidden">
-            <h4 class="section-title">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/>
-                <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/>
-              </svg>
-              Extracted Hyperlinks (<span id="urlCount">0</span>)
-            </h4>
-            <div id="urlsList" class="urls-list">
-              <!-- Dynamically populated URLs -->
+            <!-- MASKED HYPERLINK & BUTTON INSPECTOR -->
+            <div id="linksInspectorSection" class="inspector-section hidden">
+              <h4 class="section-title">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/>
+                  <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/>
+                </svg>
+                Embedded Link & Button Inspector (<span id="inspectedLinkCount">0</span>)
+              </h4>
+              <div class="link-table-wrapper">
+                <table class="link-table" id="linkTable">
+                  <thead>
+                    <tr>
+                      <th>Visible Anchor / Button</th>
+                      <th>Hidden Real Destination</th>
+                      <th>Risk Evaluation</th>
+                    </tr>
+                  </thead>
+                  <tbody id="linkTableBody"></tbody>
+                </table>
+              </div>
             </div>
-          </div>
 
-          <!-- Preprocessed NLP token preview accordion -->
-          <details class="tech-details">
-            <summary class="tech-summary">Inspect Normalized Feature Preview</summary>
-            <div class="tech-content">
-              <p class="tech-desc">Text after custom regex URL scrubbing, special character handling, and token normalization:</p>
-              <pre id="cleanTextPreview" class="code-block"></pre>
+            <!-- SENDER & HEADER SECURITY CARD -->
+            <div id="headerSection" class="inspector-section hidden">
+              <h4 class="section-title">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
+                  <polyline points="22,6 12,13 2,6"/>
+                </svg>
+                Sender & Header Authentication Details
+              </h4>
+              <div id="headerDetailsGrid" class="details-grid"></div>
             </div>
-          </details>
 
-        </div>
-      </section>
+            <!-- ATTACHMENT RISK CARD -->
+            <div id="attachmentSection" class="inspector-section hidden">
+              <h4 class="section-title">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="m21.44 11.05-9.19 9.19a6 6 0 0 1-8.49-8.49l8.57-8.57A4 4 0 1 1 18 8.84l-8.59 8.57a2 2 0 0 1-2.83-2.83l8.49-8.48"/>
+                </svg>
+                Attachment Screening (<span id="attachmentCount">0</span>)
+              </h4>
+              <div id="attachmentsList" class="attachments-list"></div>
+            </div>
 
+            <!-- DETECTED THREAT SIGNALS -->
+            <div class="signals-section">
+              <h4 class="section-title">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/>
+                  <line x1="12" y1="9" x2="12" y2="13"/>
+                  <line x1="12" y1="17" x2="12.01" y2="17"/>
+                </svg>
+                Security Heuristics & Threat Signals
+              </h4>
+              <div id="signalsList" class="signals-list"></div>
+            </div>
+
+            <!-- Active Learning Human Feedback -->
+            <div class="feedback-card">
+              <span>Is this prediction correct?</span>
+              <div class="feedback-actions">
+                <button type="button" class="btn-feedback" id="feedbackSafeBtn">Mark as Legitimate</button>
+                <button type="button" class="btn-feedback" id="feedbackPhishBtn">Mark as Phishing</button>
+              </div>
+            </div>
+
+          </div>
+        </section>
+
+      </div>
     </div>
 
-    <!-- Scan History Drawer / Section -->
-    <section class="panel history-panel">
-      <div class="panel-header">
-        <div class="panel-title-wrap">
-          <svg class="panel-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <circle cx="12" cy="12" r="10"/>
-            <polyline points="12 6 12 12 16 14"/>
-          </svg>
-          <h3>Recent Session Audit Log</h3>
+    <!-- ================================================================= -->
+    <!-- TAB 2: DATA & MODEL OPERATIONS HUB (MLOps) -->
+    <!-- ================================================================= -->
+    <div id="dataHubTab" class="tab-pane hidden">
+      <div class="hub-container">
+        
+        <!-- Top Stats Row -->
+        <div class="hub-stats-grid">
+          <div class="stat-card">
+            <span class="stat-label">TOTAL DATASET SIZE</span>
+            <strong class="stat-value" id="hubTotalSamples">56,667</strong>
+            <span class="stat-sub">Combined & Deduplicated Corpus</span>
+          </div>
+
+          <div class="stat-card">
+            <span class="stat-label">CLASS BALANCE</span>
+            <div class="balance-bar-wrap">
+              <div class="balance-bar">
+                <div id="hubLegitBar" class="bar-legit" style="width: 49.9%"></div>
+                <div id="hubPhishBar" class="bar-phish" style="width: 50.1%"></div>
+              </div>
+              <div class="balance-labels">
+                <span id="hubLegitLabel">Legitimate: 49.9%</span>
+                <span id="hubPhishLabel">Phishing: 50.1%</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="stat-card">
+            <span class="stat-label">MODEL TEST ACCURACY</span>
+            <strong class="stat-value text-accent" id="hubAccuracy">99.33%</strong>
+            <span class="stat-sub">ROC-AUC: <span id="hubRocAuc">0.9996</span></span>
+          </div>
+
+          <div class="stat-card">
+            <span class="stat-label">ACTIVE PIPELINE</span>
+            <strong class="stat-value" style="font-size: 1.25rem;">LinearSVC (CV-3)</strong>
+            <span class="stat-sub" id="hubLastTrained">Last Trained: Recently</span>
+          </div>
         </div>
-        <button id="clearHistoryBtn" class="btn-ghost" title="Clear session history">
-          Clear History
-        </button>
+
+        <!-- Middle Action Grid: Upload & Retrain -->
+        <div class="hub-action-grid">
+          
+          <!-- Upload New Data Card -->
+          <div class="panel hub-card">
+            <div class="panel-header">
+              <div class="panel-title-wrap">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                  <polyline points="17 8 12 3 7 8"/>
+                  <line x1="12" y1="3" x2="12" y2="15"/>
+                </svg>
+                <h3>Upload & Ingest Training Data</h3>
+              </div>
+            </div>
+
+            <p class="hub-card-desc">
+              Upload new CSV or JSON files with emails to expand the model's knowledge. Automatic column mapping detects <code>text</code> and <code>label</code> schemas and eliminates duplicate records.
+            </p>
+
+            <div class="dropzone" id="datasetDropzone">
+              <input type="file" id="datasetFileInput" class="file-input-hidden" accept=".csv,.json" />
+              <div class="dropzone-content">
+                <div class="dropzone-icon">
+                  <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                    <polyline points="14 2 14 8 20 8"/>
+                  </svg>
+                </div>
+                <h4>Select Training CSV or JSON</h4>
+                <p class="dropzone-sub">Drop file here or click to browse</p>
+                <button type="button" class="btn-secondary" id="browseDatasetBtn">Choose File</button>
+              </div>
+            </div>
+
+            <!-- Upload result alert -->
+            <div id="datasetUploadResult" class="upload-result-box hidden"></div>
+          </div>
+
+          <!-- Model Retraining Card -->
+          <div class="panel hub-card">
+            <div class="panel-header">
+              <div class="panel-title-wrap">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <polyline points="23 4 23 10 17 10"/>
+                  <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/>
+                </svg>
+                <h3>One-Click Model Retraining</h3>
+              </div>
+            </div>
+
+            <p class="hub-card-desc">
+              Trains the full TF-IDF + Calibrated LinearSVC pipeline on the complete merged dataset. Automatically creates a safety backup before retraining.
+            </p>
+
+            <div class="retrain-controls">
+              <button type="button" id="retrainBtn" class="btn-primary full-width">
+                <span class="btn-text">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <polygon points="5 3 19 12 5 21 5 3"/>
+                  </svg>
+                  Retrain Model Pipeline
+                </span>
+                <span class="btn-spinner hidden"></span>
+              </button>
+
+              <button type="button" id="rollbackBtn" class="btn-ghost-danger full-width" title="Restore previous model backup">
+                Rollback to Previous Model Backup
+              </button>
+            </div>
+
+            <!-- Retrain Console Terminal -->
+            <div id="retrainTerminal" class="terminal-box hidden">
+              <div class="terminal-header">
+                <span class="terminal-dot dot-red"></span>
+                <span class="terminal-dot dot-yellow"></span>
+                <span class="terminal-dot dot-green"></span>
+                <span class="terminal-title">Training Execution Log</span>
+              </div>
+              <pre id="retrainLog" class="terminal-content">Ready for training execution...</pre>
+            </div>
+
+            <!-- Comparison Table -->
+            <div id="metricsComparisonCard" class="comparison-card hidden">
+              <h4>Training Performance Telemetry</h4>
+              <table class="metrics-table">
+                <thead>
+                  <tr>
+                    <th>Metric</th>
+                    <th>Previous Model</th>
+                    <th>New Retrained Model</th>
+                  </tr>
+                </thead>
+                <tbody id="metricsComparisonBody"></tbody>
+              </table>
+            </div>
+
+          </div>
+
+        </div>
+
       </div>
-      <div id="historyContainer" class="history-container">
-        <p class="history-empty">No scans recorded in this session yet.</p>
-      </div>
-    </section>
+    </div>
 
   </main>
 
@@ -301,13 +559,9 @@
     <span id="toastMessage"></span>
   </div>
 
-  <footer class="app-footer">
-    <div class="container footer-inner">
-      <p>Phishing Sentinel Engine • Calibrated LinearSVC + 15k n-gram TF-IDF • CEAS_08 & Phishing_Email Datasets</p>
-      <p class="footer-sub">Built with FastAPI, HTML5, CSS3 & ES6 JavaScript.</p>
-    </div>
-  </footer>
 
-  <script src="/static/js/app.js"></script>
+  <script src="/static/js/app.js?v=2.1"></script>
 </body>
 </html>
+
+

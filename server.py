@@ -1,13 +1,12 @@
 """
-Production-Ready FastAPI Server for Phishing Email Detection
-=============================================================
-Serves REST API endpoints for model inference and hosts the
-HTML/CSS/JS frontend application.
-
-Run with:
-    python server.py
-or
-    uvicorn server:app --host 0.0.0.0 --port 8000 --reload
+Production-Ready FastAPI Server for Phishing Email & Document Sentinel
+======================================================================
+Serves REST API endpoints for:
+1. Multi-modal document & email file scanning (.eml, .msg, .pdf, .docx, .xlsx, images/OCR, .html, .txt)
+2. Manual text/HTML threat prediction with token-level SVM explainability (heatmaps)
+3. Deep masked link de-anonymization ("Click Here", buttons, domain mismatches)
+4. Anti-evasion sanitization (zero-width characters & hidden HTML)
+5. Dataset telemetry, CSV/JSON data ingestion, 1-click model retraining, and rollback
 """
 
 import os
@@ -18,73 +17,83 @@ from contextlib import asynccontextmanager
 from typing import List, Dict, Any, Optional
 
 import joblib
-from fastapi import FastAPI, HTTPException, status
+from fastapi import FastAPI, HTTPException, UploadFile, File, Form, status
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse, JSONResponse
 from pydantic import BaseModel, Field
 
-# Import clean_text from training module to preserve pipeline consistency
-from phishing_svm_classifier import clean_text
+# Core classifier and explainability
+from phishing_svm_classifier import clean_text, explain_prediction, get_model_coefficients
+from security_heuristics import (
+    sanitize_evasions,
+    analyze_headers,
+    inspect_hyperlinks,
+    inspect_attachments,
+    inspect_url
+)
+from document_parsers import UniversalDocumentParser, extract_masked_links_from_text_and_html
+import dataset_manager
 
-# Configure structured logging
 logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s [%(levelname)s] %(name)s: %(message)s"
 )
-logger = logging.getLogger("phishing-detector-server")
+logger = logging.getLogger("phishing-sentinel-server")
 
 MODEL_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "phishing_detector_model.joblib")
 STATIC_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "static")
 
-# Global state for loaded model pipeline
 app_state: Dict[str, Any] = {
     "model": None,
     "model_loaded_at": None,
     "model_path": MODEL_PATH,
     "dataset_info": {
         "training_samples": "56,000+",
-        "datasets": ["CEAS_08", "Phishing_Email"],
-        "accuracy": "99.3%",
-        "architecture": "TF-IDF (15,000 features, n-grams 1-2) + LinearSVC (CalibratedClassifierCV)"
+        "architecture": "Calibrated LinearSVC + Sublinear TF-IDF + Heuristic Defense Engine"
     }
 }
 
 
-@asynccontextmanager
-async def lifespan(app: FastAPI):
-    """Lifecycle manager to load and warm up ML model on startup."""
-    logger.info("Initializing Phishing Detector Server...")
+def load_model_pipeline():
+    """Loads and warms up the ML model."""
     if not os.path.exists(MODEL_PATH):
         logger.error(f"Model file not found at: {MODEL_PATH}")
-    else:
-        try:
-            logger.info(f"Loading ML pipeline from {MODEL_PATH}...")
-            start_t = time.perf_counter()
-            model = joblib.load(MODEL_PATH)
-            # Warm up model with sample text
-            _ = model.predict_proba([clean_text("Warm-up email verification")])
-            load_duration = (time.perf_counter() - start_t) * 1000
-            app_state["model"] = model
-            app_state["model_loaded_at"] = time.strftime("%Y-%m-%d %H:%M:%S UTC", time.gmtime())
-            logger.info(f"Model successfully loaded and warmed up in {load_duration:.2f}ms.")
-        except Exception as e:
-            logger.exception(f"Failed to load ML model: {e}")
+        app_state["model"] = None
+        return None
 
+    try:
+        logger.info(f"Loading ML pipeline from {MODEL_PATH}...")
+        start_t = time.perf_counter()
+        model = joblib.load(MODEL_PATH)
+        # Warmup
+        _ = model.predict_proba([clean_text("warm-up email check")])
+        load_duration = (time.perf_counter() - start_t) * 1000
+        app_state["model"] = model
+        app_state["model_loaded_at"] = time.strftime("%Y-%m-%d %H:%M:%S UTC", time.gmtime())
+        logger.info(f"Model successfully loaded and warmed up in {load_duration:.2f}ms.")
+        return model
+    except Exception as e:
+        logger.exception(f"Failed to load ML model: {e}")
+        app_state["model"] = None
+        return None
+
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    logger.info("Initializing Phishing Sentinel API...")
+    load_model_pipeline()
     yield
+    logger.info("Shutting down Phishing Sentinel API...")
 
-    logger.info("Shutting down Phishing Detector Server...")
 
-
-# FastAPI Application instance
 app = FastAPI(
-    title="Phishing Email Sentinel API",
-    description="High-performance ML API for detecting phishing emails and malicious intent.",
-    version="1.0.0",
+    title="Phishing Email & Document Sentinel API",
+    description="Universal Multi-Modal Threat Detection & Model Operations Platform.",
+    version="2.0.0",
     lifespan=lifespan
 )
 
-# Enable CORS for external frontend consumers / microservices
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -97,20 +106,53 @@ app.add_middleware(
 # ============================================================================
 # Schemas
 # ============================================================================
+
 class PredictRequest(BaseModel):
     email_text: str = Field(
         ...,
         min_length=1,
-        max_length=200000,
-        description="The full email text (subject, headers, and/or body) to analyze.",
-        example="Subject: Urgent: Your account has been suspended! Verify your login immediately at http://secure-bank-login.xyz"
+        max_length=500000,
+        description="The raw email text, HTML, or message body to analyze.",
+        example="Subject: Urgent: Verify your PayPal account now at http://fake-login.xyz"
+    )
+    sensitivity: Optional[float] = Field(
+        0.50,
+        ge=0.10,
+        le=0.90,
+        description="Decision sensitivity threshold (0.35 Strict, 0.50 Balanced, 0.70 Relaxed)."
     )
 
 class IndicatorSignal(BaseModel):
     category: str
-    severity: str  # info, warning, danger
+    severity: str  # safe, info, warning, danger
     title: str
     description: str
+
+class LinkItem(BaseModel):
+    anchor_text: str
+    target_url: str
+    domain: str
+    flags: List[str]
+    is_mismatch: bool
+    risk_severity: str
+
+class AttachmentItem(BaseModel):
+    filename: str
+    size_bytes: int
+    mime_type: str
+    flags: List[str]
+    risk_severity: str
+
+class TokenAttribution(BaseModel):
+    token: str
+    score: float
+    type: str
+
+class TopFeature(BaseModel):
+    feature: str
+    weight: float
+    contribution: float
+    direction: str
 
 class PredictResponse(BaseModel):
     is_phishing: bool
@@ -118,65 +160,65 @@ class PredictResponse(BaseModel):
     risk_level: str  # SAFE, LOW, MEDIUM, HIGH, CRITICAL
     phishing_probability: float
     confidence: float
+    sensitivity_threshold: float
     extracted_urls: List[str]
+    inspected_links: List[LinkItem]
     threat_signals: List[IndicatorSignal]
+    scanned_attachments: List[AttachmentItem]
+    headers_analysis: Optional[Dict[str, Any]] = None
+    heatmap_tokens: List[TokenAttribution]
+    top_features: List[TopFeature]
     clean_text_preview: str
     processing_time_ms: float
+    file_metadata: Optional[Dict[str, Any]] = None
 
 
-# Preset examples
+# Curated presets for interactive testing
 PRESET_EXAMPLES = [
     {
-        "id": "urgent_suspension",
-        "title": "Urgent: Account Suspension",
+        "id": "masked_click_here",
+        "title": "Masked Link / 'Click Here' Deception",
         "category": "phishing",
-        "tag": "Credential Theft",
-        "subject": "Urgent: Your Bank Account Has Been Suspended!",
+        "tag": "Hidden URL",
+        "subject": "Urgent: Unrecognized Login from Russia",
         "content": (
-            "Subject: Urgent: Your Bank Account Has Been Suspended!\n\n"
+            "Subject: Urgent: Unrecognized Login from Russia\n\n"
             "Dear customer,\n\n"
-            "We have observed unauthorized login attempts on your account from an unrecognized IP address. "
-            "For your security, your account access has been temporarily restricted.\n\n"
-            "To restore your account and verify your identity, visit our secure portal immediately:\n"
-            "http://verify-secure-bank-login.xyz/auth/login\n\n"
-            "Failure to verify within 24 hours will result in permanent account termination.\n\n"
-            "Security Team, Customer Protection Dept."
+            "We detected an unauthorized sign-in to your bank account from IP 185.220.101.5 (Moscow, Russia).\n\n"
+            "If this was not you, please verify your credentials immediately:\n"
+            "<a href=\"http://verify-bank-sec.xyz/auth/login\">Click Here to Verify Your Account</a>\n\n"
+            "Failure to confirm your identity within 12 hours will lead to account suspension.\n\n"
+            "Fraud Prevention Unit"
         )
     },
     {
-        "id": "lottery_crypto",
-        "title": "Crypto / Prize Claim",
+        "id": "domain_spoof_mismatch",
+        "title": "Visible Domain Mismatch Spoofing",
         "category": "phishing",
-        "tag": "Financial Scam",
-        "subject": "CONGRATULATIONS! You won $1,500,000 USD",
+        "tag": "Spoofed Domain",
+        "subject": "Important Security Update for PayPal Users",
         "content": (
-            "Subject: CONGRATULATIONS! You won $1,500,000 USD\n\n"
-            "Dear Winner,\n\n"
-            "You have been selected as the grand winner of the 2026 International Crypto & Grant Sweepstakes. "
-            "Your prize fund of $1,500,000 USD has been deposited with our escrow agent.\n\n"
-            "To claim your funds, reply with your full legal name, telephone number, and bank wire details to "
-            "claim-dept@freemail-international-award.org.\n\n"
-            "Do not disclose this notification to anyone for security reasons."
-        )
-    },
-    {
-        "id": "fake_doc_share",
-        "title": "Shared Payroll Document",
-        "category": "phishing",
-        "tag": "Link Phishing",
-        "subject": "Important: Updated Q3 Employee Bonus & Compensation Plan",
-        "content": (
-            "Subject: Important: Updated Q3 Employee Bonus & Compensation Plan\n\n"
+            "Subject: Important Security Update for PayPal Users\n\n"
             "Hello,\n\n"
-            "Please review the attached confidential compensation and bonus schedule spreadsheet for this quarter. "
-            "You must authenticate with your corporate Microsoft 365 login to access the file:\n\n"
-            "http://sharepoint-secure-auth.top/payroll/bonus-review.xlsx\n\n"
-            "Please complete this review by end of day.\n\n"
-            "Human Resources Department"
+            "To keep your account active, please review our new terms of service:\n"
+            "<a href=\"http://paypa1-update.top/security\">https://www.paypal.com/security-update</a>\n\n"
+            "Please complete this review today.\n\n"
+            "PayPal Security Department"
         )
     },
     {
-        "id": "safe_meeting",
+        "id": "zero_width_evasion",
+        "title": "Zero-Width Evasion Technique",
+        "category": "phishing",
+        "tag": "NLP Evasion",
+        "subject": "A​c​c​o​u​n​t S​u​s​p​e​n​d​e​d",
+        "content": (
+            "Subject: A\u200Bc\u200Bc\u200Bo\u200Bu\u200Bn\u200Bt S\u200Bu\u200Bs\u200Bp\u200Be\u200Bn\u200Bd\u200Be\u200Bd\n\n"
+            "Your P\u200Ba\u200Bs\u200Bs\u200Bw\u200Bo\u200Br\u200Bd has expired. Visit http://portal-auth-365.buzz to reset."
+        )
+    },
+    {
+        "id": "safe_sprint_retro",
         "title": "Sprint Retrospective Notes",
         "category": "legitimate",
         "tag": "Safe / Work",
@@ -191,95 +233,158 @@ PRESET_EXAMPLES = [
             "Let me know if I missed anything in the summary.\n\n"
             "Best regards,\nSarah Jenkins\nEngineering Team Lead"
         )
-    },
-    {
-        "id": "safe_shipping",
-        "title": "Package Shipping Notice",
-        "category": "legitimate",
-        "tag": "Safe / Order",
-        "subject": "Your Order #94821 has shipped",
-        "content": (
-            "Subject: Your Order #94821 has shipped\n\n"
-            "Hello,\n\n"
-            "Good news! Your package is on its way. Estimated delivery date is Thursday between 10:00 AM and 2:00 PM.\n\n"
-            "You can track delivery progress and manage delivery preferences in your customer account order history.\n\n"
-            "Thank you for shopping with us!"
-        )
     }
 ]
 
 
 # ============================================================================
-# Deep Heuristic Analysis Helpers
+# Core Pipeline Processing Logic
 # ============================================================================
-URL_REGEX = re.compile(r"https?://[^\s<>\"']+|www\.[^\s<>\"']+", re.IGNORECASE)
-SUSPICIOUS_TLDS = [".xyz", ".top", ".tk", ".ru", ".buzz", ".work", ".click", ".fit", ".ga", ".cf", ".ml"]
 
-def extract_threat_signals(raw_text: str, urls: List[str]) -> List[IndicatorSignal]:
-    """Inspects text and extracted URLs for common threat vectors and heuristics."""
-    signals: List[IndicatorSignal] = []
-    lower = raw_text.lower()
+def process_threat_scan(
+    raw_text: str,
+    extracted_links: List[Dict[str, str]] = None,
+    headers: Dict[str, str] = None,
+    attachments: List[Dict[str, Any]] = None,
+    file_metadata: Dict[str, Any] = None,
+    sensitivity: float = 0.50
+) -> PredictResponse:
+    """
+    Unified evaluation engine combining:
+    1. Anti-evasion sanitization
+    2. Deep masked link inspection & domain mismatch checks
+    3. Sender identity & header checks (SPF/DKIM/DMARC)
+    4. Attachment screening (double extensions, scripts, macros)
+    5. Calibrated SVM machine learning inference
+    6. Native token-level explainability (heatmaps & top features)
+    7. Tunable sensitivity risk scoring
+    """
+    model = app_state["model"]
+    if model is None:
+        model = load_model_pipeline()
+    if model is None:
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail="Machine learning model is not loaded. Please ensure phishing_detector_model.joblib exists."
+        )
 
-    # 1. URL Analysis
-    if urls:
-        suspicious_urls = [u for u in urls if any(tld in u.lower() for tld in SUSPICIOUS_TLDS) or "login" in u.lower() or "verify" in u.lower()]
-        if suspicious_urls:
-            signals.append(IndicatorSignal(
-                category="suspicious_link",
-                severity="danger",
-                title="High-Risk URLs Detected",
-                description=f"Found {len(suspicious_urls)} link(s) matching known phishing patterns or suspicious TLDs: {', '.join(suspicious_urls[:3])}"
-            ))
-        else:
-            signals.append(IndicatorSignal(
-                category="hyperlink",
-                severity="warning",
-                title="Hyperlinks Present",
-                description=f"Contains {len(urls)} external hyperlink(s). Phishing campaigns frequently redirect users to spoofed web pages."
-            ))
+    start_t = time.perf_counter()
 
-    # 2. Urgency & Coercion
+    # 1. Anti-Evasion Sanitization (Zero-Width & Hidden HTML)
+    sanitized_text, evasion_signals = sanitize_evasions(raw_text)
+
+    # 2. Extract and Unmask Hyperlinks
+    if extracted_links is None:
+        extracted_links = extract_masked_links_from_text_and_html(raw_text)
+
+    inspected_links, link_signals = inspect_hyperlinks(extracted_links)
+    all_target_urls = [link["target_url"] for link in inspected_links]
+
+    # 3. Header & Sender Analysis
+    header_signals = analyze_headers(headers or {})
+
+    # 4. Attachment Screening
+    scanned_attachments, attachment_signals = inspect_attachments(attachments or [], body_text=sanitized_text)
+
+    # Combine all threat heuristic signals
+    all_signals = evasion_signals + link_signals + header_signals + attachment_signals
+
+    # 5. Additional Heuristic keyword checks on sanitized text
+    lower = sanitized_text.lower()
     urgency_terms = ["urgent", "immediately", "account suspended", "suspended", "action required", "locked", "within 24 hours", "unauthorized access", "terminate"]
     detected_urgency = [w for w in urgency_terms if w in lower]
     if detected_urgency:
-        signals.append(IndicatorSignal(
-            category="urgency",
-            severity="danger" if len(detected_urgency) >= 2 else "warning",
-            title="Urgency / Fear Inducement",
-            description=f"Pressure tactics detected ({', '.join(detected_urgency[:3])}). Attackers use artificial urgency to prevent critical evaluation."
-        ))
+        all_signals.append({
+            "category": "urgency",
+            "severity": "danger" if len(detected_urgency) >= 2 else "warning",
+            "title": "Urgency & Coercion Phrasing",
+            "description": f"Pressure tactics detected ({', '.join(detected_urgency[:3])}). Attackers use artificial urgency to prevent critical evaluation."
+        })
 
-    # 3. Credential Harvesting
-    credential_terms = ["password", "credential", "ssn", "social security", "pin", "verify your identity", "login details", "authenticate", "microsoft 365"]
-    detected_creds = [w for w in credential_terms if w in lower]
+    cred_terms = ["password", "credential", "ssn", "social security", "pin", "verify your identity", "login details", "authenticate"]
+    detected_creds = [w for w in cred_terms if w in lower]
     if detected_creds:
-        signals.append(IndicatorSignal(
-            category="credential_theft",
-            severity="danger",
-            title="Credential Solicitation",
-            description=f"Email prompts for sensitive credentials or authentication ({', '.join(detected_creds[:3])})."
-        ))
+        all_signals.append({
+            "category": "credential_theft",
+            "severity": "danger",
+            "title": "Credential Solicitation",
+            "description": f"Prompts for sensitive credentials or authentication details ({', '.join(detected_creds[:3])})."
+        })
 
-    # 4. Financial & Monetary Lures
-    financial_terms = ["$", "usd", "wire transfer", "bitcoin", "crypto", "won", "lottery", "prize", "million", "sweepstakes", "inheritance"]
-    detected_finance = [w for w in financial_terms if w in lower]
+    finance_terms = ["wire transfer", "bitcoin", "crypto", "won", "lottery", "prize", "sweepstakes", "inheritance", "million usd"]
+    detected_finance = [w for w in finance_terms if w in lower]
     if detected_finance:
-        signals.append(IndicatorSignal(
-            category="financial_lure",
-            severity="warning",
-            title="Financial Incentive / Prize Claim",
-            description=f"Monetary keywords identified ({', '.join(detected_finance[:3])}). Often used as social engineering bait."
-        ))
+        all_signals.append({
+            "category": "financial_lure",
+            "severity": "warning",
+            "title": "Financial Scam Lure",
+            "description": f"High-yield monetary bait identified ({', '.join(detected_finance[:3])})."
+        })
 
-    return signals
+    # 6. SVM Inference & Native Explainability
+    explanation = explain_prediction(model, sanitized_text, top_k=10, unmasked_urls=all_target_urls)
+    ml_prob = explanation["phishing_prob"]
+
+    # 7. Tunable Sensitivity Threshold Evaluation
+    is_phishing = bool(ml_prob >= sensitivity)
+
+    # Escalate risk if critical threat signals were detected
+    has_critical_danger = any(s["severity"] == "danger" for s in all_signals)
+    if has_critical_danger and ml_prob < sensitivity and ml_prob > 0.30:
+        is_phishing = True
+
+    # Multi-tier Risk Assessment
+    if ml_prob >= 0.80 or (has_critical_danger and ml_prob >= 0.50):
+        risk_level = "CRITICAL"
+        verdict = "PHISHING DETECTED"
+    elif ml_prob >= sensitivity:
+        risk_level = "HIGH"
+        verdict = "SUSPECTED PHISHING"
+    elif ml_prob >= 0.35 or has_critical_danger:
+        risk_level = "MEDIUM"
+        verdict = "SUSPICIOUS / ELEVATED RISK"
+    elif ml_prob >= 0.15:
+        risk_level = "LOW"
+        verdict = "LIKELY LEGITIMATE"
+    else:
+        risk_level = "SAFE"
+        verdict = "LEGITIMATE / SAFE"
+
+    confidence = ml_prob if is_phishing else (1.0 - ml_prob)
+    elapsed_ms = (time.perf_counter() - start_t) * 1000
+
+    clean_preview = clean_text(sanitized_text, unmasked_urls=all_target_urls)
+    clean_preview = clean_preview[:160] + ("..." if len(clean_preview) > 160 else "")
+
+    return PredictResponse(
+        is_phishing=is_phishing,
+        verdict=verdict,
+        risk_level=risk_level,
+        phishing_probability=round(ml_prob, 4),
+        confidence=round(confidence, 4),
+        sensitivity_threshold=round(sensitivity, 2),
+        extracted_urls=all_target_urls,
+        inspected_links=[LinkItem(**l) for l in inspected_links],
+        threat_signals=[IndicatorSignal(**s) for s in all_signals],
+        scanned_attachments=[AttachmentItem(**a) for a in scanned_attachments],
+        headers_analysis=headers if headers else None,
+        heatmap_tokens=[TokenAttribution(**t) for t in explanation["heatmap_tokens"]],
+        top_features=[TopFeature(**f) for f in explanation["top_features"]],
+        clean_text_preview=clean_preview,
+        processing_time_ms=round(elapsed_ms, 2),
+        file_metadata=file_metadata
+    )
 
 
 # ============================================================================
 # API Endpoints
 # ============================================================================
+
 @app.get("/api/health")
 async def health_check():
-    """Health check endpoint reporting API and model readiness."""
+    """Health check reporting model state and dataset size."""
+    if app_state["model"] is None:
+        load_model_pipeline()
     is_ready = app_state["model"] is not None
     return {
         "status": "healthy" if is_ready else "degraded",
@@ -290,111 +395,155 @@ async def health_check():
     }
 
 
+
 @app.get("/api/examples")
 async def get_examples():
-    """Returns curated preset email examples for quick testing."""
+    """Returns preset curated test samples."""
     return {"examples": PRESET_EXAMPLES}
 
 
 @app.post("/api/predict", response_model=PredictResponse)
-async def predict_email(payload: PredictRequest):
+async def predict_text(payload: PredictRequest):
+    """Analyzes raw email or HTML text."""
+    raw = payload.email_text.strip()
+    if not raw:
+        raise HTTPException(status_code=422, detail="Text cannot be empty.")
+    return process_threat_scan(raw, sensitivity=payload.sensitivity or 0.50)
+
+
+@app.post("/api/scan-file", response_model=PredictResponse)
+async def scan_file(
+    file: UploadFile = File(...),
+    sensitivity: float = Form(0.50)
+):
     """
-    Analyzes an email text using the trained SVM ML pipeline
-    and deep heuristic security rules.
+    Universal multi-modal file ingestion endpoint.
+    Accepts .eml, .msg, .pdf, .docx, .xlsx, images/OCR, .html, .txt, etc.
     """
-    model = app_state["model"]
-    if model is None:
-        raise HTTPException(
-            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
-            detail="Machine learning model is not loaded. Please ensure phishing_detector_model.joblib exists."
-        )
+    file_bytes = await file.read()
+    if not file_bytes:
+        raise HTTPException(status_code=422, detail="Uploaded file is empty.")
 
-    raw_text = payload.email_text.strip()
-    if not raw_text:
-        raise HTTPException(
-            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-            detail="Email text cannot be empty."
-        )
-
-    start_time = time.perf_counter()
-
-    # Preprocessing
-    cleaned = clean_text(raw_text)
-
-    # ML Inference
     try:
-        pred = model.predict([cleaned])[0]
-        prob_array = model.predict_proba([cleaned])[0]
-        phishing_prob = float(prob_array[1])
+        parsed = UniversalDocumentParser.parse_file(file_bytes, file.filename)
     except Exception as e:
-        logger.exception("Error during model inference")
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Inference error: {str(e)}"
-        )
+        logger.exception("Failed parsing document")
+        raise HTTPException(status_code=500, detail=f"Document parsing error: {str(e)}")
 
-    is_phishing = bool(pred == 1)
+    content = f"Subject: {parsed.get('subject', '')}\n\n{parsed.get('text', '')}"
+    if parsed.get("html"):
+        content += "\n\n" + parsed["html"]
 
-    # Extract URLs & heuristics
-    urls = URL_REGEX.findall(raw_text)
-    signals = extract_threat_signals(raw_text, urls)
+    file_meta = {
+        "filename": parsed.get("filename"),
+        "extension": parsed.get("extension"),
+        **parsed.get("metadata", {})
+    }
 
-    # Determine Risk Tier
-    if phishing_prob >= 0.80:
-        risk_level = "CRITICAL"
-        verdict = "PHISHING DETECTED"
-    elif phishing_prob >= 0.55:
-        risk_level = "HIGH"
-        verdict = "SUSPECTED PHISHING"
-    elif phishing_prob >= 0.35:
-        risk_level = "MEDIUM"
-        verdict = "SUSPICIOUS / ELEVATED RISK"
-    elif phishing_prob >= 0.15:
-        risk_level = "LOW"
-        verdict = "LIKELY LEGITIMATE"
-    else:
-        risk_level = "SAFE"
-        verdict = "LEGITIMATE / SAFE"
-
-    confidence = phishing_prob if is_phishing else (1.0 - phishing_prob)
-    elapsed_ms = (time.perf_counter() - start_time) * 1000
-
-    preview = cleaned[:160] + ("..." if len(cleaned) > 160 else "")
-
-    return PredictResponse(
-        is_phishing=is_phishing,
-        verdict=verdict,
-        risk_level=risk_level,
-        phishing_probability=round(phishing_prob, 4),
-        confidence=round(confidence, 4),
-        extracted_urls=urls,
-        threat_signals=signals,
-        clean_text_preview=preview,
-        processing_time_ms=round(elapsed_ms, 2)
+    return process_threat_scan(
+        raw_text=content,
+        extracted_links=parsed.get("links", []),
+        headers=parsed.get("headers", {}),
+        attachments=parsed.get("attachments", []),
+        file_metadata=file_meta,
+        sensitivity=sensitivity
     )
+
+
+# ============================================================================
+# Dataset & Model Operations (MLOps) Endpoints
+# ============================================================================
+
+@app.get("/api/dataset/stats")
+async def dataset_stats():
+    """Live telemetry for Dataset & Model Operations Hub."""
+    try:
+        stats = dataset_manager.get_dataset_statistics()
+        return stats
+    except Exception as e:
+        logger.exception("Error reading dataset stats")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.post("/api/dataset/upload")
+async def upload_dataset_file(file: UploadFile = File(...)):
+    """Uploads and merges new CSV or JSON training data."""
+    file_bytes = await file.read()
+    if not file_bytes:
+        raise HTTPException(status_code=422, detail="Empty upload.")
+
+    try:
+        result = dataset_manager.ingest_uploaded_data(file_bytes, file.filename)
+        return result
+    except Exception as e:
+        logger.exception("Error ingesting dataset")
+        raise HTTPException(status_code=400, detail=str(e))
+
+
+@app.post("/api/dataset/retrain")
+async def retrain_model(max_features: int = 30000):
+    """Triggers 1-click model retraining on the current master dataset."""
+    try:
+        result = dataset_manager.retrain_model_pipeline(max_features=max_features)
+        # Reload active model into memory
+        load_model_pipeline()
+        return result
+    except Exception as e:
+        logger.exception("Error retraining model")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.post("/api/dataset/rollback")
+async def rollback_model():
+    """Restores the previous model version from backup."""
+    try:
+        result = dataset_manager.rollback_model()
+        # Reload active model into memory
+        load_model_pipeline()
+        return result
+    except Exception as e:
+        logger.exception("Error rolling back model")
+        raise HTTPException(status_code=400, detail=str(e))
+
+
+@app.post("/api/feedback")
+async def submit_feedback(payload: Dict[str, Any]):
+    """Receives active learning human-labeled feedback."""
+    text = payload.get("text", "").strip()
+    label = payload.get("label")
+    if not text or label not in [0, 1]:
+        raise HTTPException(status_code=422, detail="Invalid feedback payload.")
+
+    try:
+        # Append single row to master dataset
+        df = dataset_manager.ensure_master_dataset()
+        new_row = pd.DataFrame([{
+            "text": text,
+            "label": int(label),
+            "clean_text": clean_text(text)
+        }])
+        df = pd.concat([df, new_row], ignore_index=True).drop_duplicates(subset=["text"])
+        df.to_csv(dataset_manager.MASTER_DATASET_PATH, index=False)
+        return {"status": "success", "message": "Feedback recorded in training pool."}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
 
 
 # ============================================================================
 # Static Files & SPA Route
 # ============================================================================
+
 if os.path.exists(STATIC_DIR):
     app.mount("/static", StaticFiles(directory=STATIC_DIR), name="static")
 
 @app.get("/")
 async def serve_index():
-    """Serves the main frontend Single Page Application."""
     index_path = os.path.join(STATIC_DIR, "index.html")
     if os.path.exists(index_path):
         return FileResponse(index_path)
-    return JSONResponse(
-        status_code=404,
-        content={"error": "Frontend assets not found in static/ directory."}
-    )
+    return JSONResponse(status_code=404, content={"error": "Frontend not found in static/"})
 
 
-# ============================================================================
-# Standalone execution
-# ============================================================================
 if __name__ == "__main__":
     import uvicorn
     host = os.getenv("HOST", "127.0.0.1")

@@ -54,11 +54,28 @@ def resolve_csv_path(path_str: str) -> str:
     return path_str
 
 
-def clean_text(text: str) -> str:
-    """Normalize raw email text to enhance feature extraction."""
+ZERO_WIDTH_CHARS = ["\u200B", "\u200C", "\u200D", "\uFEFF", "\u00AD", "\u2060", "\u180E", "\u200E", "\u200F"]
+
+
+def clean_text(text: str, unmasked_urls: list = None) -> str:
+    """
+    Normalize raw email text to enhance feature extraction.
+    Strips zero-width characters and incorporates any unmasked URLs.
+    """
     if not isinstance(text, str):
         text = str(text) if text is not None else ""
+
+    # Strip zero-width evasion characters
+    for zw in ZERO_WIDTH_CHARS:
+        if zw in text:
+            text = text.replace(zw, "")
+
     text = text.lower()
+
+    # Append unmasked URLs to text so tokenizer captures them
+    if unmasked_urls:
+        text = text + " " + " ".join(str(u) for u in unmasked_urls)
+
     # Normalize URLs
     text = re.sub(r"https?://\S+|www\.\S+", " URLTOKEN ", text)
     # Normalize Email addresses
@@ -73,6 +90,7 @@ def clean_text(text: str) -> str:
     # Normalize whitespace
     text = re.sub(r"\s+", " ", text).strip()
     return text
+
 
 
 def load_dataset_source(file_path: str) -> pd.DataFrame:
@@ -212,6 +230,107 @@ def train_and_evaluate(df: pd.DataFrame, max_features: int = 30000):
     return pipeline
 
 
+def get_model_coefficients(pipeline: Pipeline):
+    """Extracts averaged linear SVM coefficients from CalibratedClassifierCV."""
+    try:
+        clf = pipeline.named_steps["classifier"]
+        if hasattr(clf, "calibrated_classifiers_"):
+            coefs_list = []
+            for c in clf.calibrated_classifiers_:
+                est = getattr(c, "estimator", None) or getattr(c, "base_estimator", None)
+                if est is not None and hasattr(est, "coef_"):
+                    coefs_list.append(est.coef_)
+            if coefs_list:
+                return np.mean(coefs_list, axis=0)[0]
+        elif hasattr(clf, "coef_"):
+            return clf.coef_[0]
+    except Exception:
+        pass
+    return None
+
+
+def explain_prediction(pipeline: Pipeline, raw_text: str, top_k: int = 10, unmasked_urls: list = None):
+    """
+    Computes token-level mathematical attribution (w_i * x_i) for native SVM explainability.
+    Returns:
+    - heatmap_tokens: list of {"token": str, "score": float, "type": "phishing" | "safe" | "neutral"}
+    - top_features: list of {"feature": str, "weight": float, "contribution": float, "direction": "phishing" | "safe"}
+    """
+    cleaned = clean_text(raw_text, unmasked_urls=unmasked_urls)
+    pred = pipeline.predict([cleaned])[0]
+    prob = pipeline.predict_proba([cleaned])[0][1]
+
+    coefs = get_model_coefficients(pipeline)
+    tfidf = pipeline.named_steps.get("tfidf")
+
+    top_features = []
+    heatmap_tokens = []
+
+    if coefs is not None and tfidf is not None:
+        try:
+            vec = tfidf.transform([cleaned])
+            feature_names = tfidf.get_feature_names_out()
+            feature_to_idx = {name: i for i, name in enumerate(feature_names)}
+
+            nonzero_indices = vec.nonzero()[1]
+            contributions = []
+            for idx in nonzero_indices:
+                feat_name = feature_names[idx]
+                w = float(coefs[idx])
+                x = float(vec[0, idx])
+                contrib = w * x
+                contributions.append({
+                    "feature": feat_name,
+                    "weight": round(w, 4),
+                    "contribution": round(contrib, 4),
+                    "direction": "phishing" if contrib > 0 else "safe"
+                })
+
+            contributions.sort(key=lambda item: abs(item["contribution"]), reverse=True)
+            top_features = contributions[:top_k]
+
+            # Generate word heatmap preserving line breaks for natural readability
+            lines = raw_text.splitlines()
+            for line_idx, line in enumerate(lines):
+                if not line.strip():
+                    heatmap_tokens.append({"token": "\n", "score": 0.0, "type": "newline"})
+                    continue
+                words = line.split(" ")
+                for word in words:
+                    if not word:
+                        continue
+                    norm_w = re.sub(r"[^\w]", "", word).lower()
+                    score = 0.0
+                    if norm_w in feature_to_idx:
+                        idx = feature_to_idx[norm_w]
+                        score = float(coefs[idx])
+
+                    if score > 0.35:
+                        token_cls = "phishing"
+                    elif score < -0.35:
+                        token_cls = "safe"
+                    else:
+                        token_cls = "neutral"
+
+                    heatmap_tokens.append({
+                        "token": word,
+                        "score": round(score, 3),
+                        "type": token_cls
+                    })
+                if line_idx < len(lines) - 1:
+                    heatmap_tokens.append({"token": "\n", "score": 0.0, "type": "newline"})
+        except Exception:
+            pass
+
+
+    return {
+        "verdict": "PHISHING" if pred == 1 else "LEGITIMATE",
+        "phishing_prob": float(prob),
+        "top_features": top_features,
+        "heatmap_tokens": heatmap_tokens
+    }
+
+
 def predict_single(pipeline: Pipeline, raw_text: str):
     """Predict label and phishing probability for arbitrary raw email string."""
     cleaned = clean_text(raw_text)
@@ -219,6 +338,7 @@ def predict_single(pipeline: Pipeline, raw_text: str):
     prob = pipeline.predict_proba([cleaned])[0][1]
     verdict = "PHISHING" if pred == 1 else "LEGITIMATE"
     return verdict, prob
+
 
 
 def main():

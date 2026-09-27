@@ -48,3 +48,7 @@ ehthumbs.db
 .env
 .env.*
 !.env.example
+
+# Large generated / cached files & model backups
+dataset_master.csv
+*_backup.joblib
