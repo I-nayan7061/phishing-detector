@@ -1,0 +1,13 @@
+Subject: URGENT: Security Alert for your Online Banking Account
+
+Dear Valued Customer,
+
+We detected multiple unauthorized attempts to log into your account from an unrecognized IP address. For your security, your account privileges have been suspended.
+
+To restore access immediately, you must verify your identity within 24 hours:
+https://online-security-banking-auth.org/verify?session=982410
+
+Failure to do so will result in permanent suspension of your account.
+
+Sincerely,
+Fraud Prevention Team
