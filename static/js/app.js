@@ -526,25 +526,39 @@ function renderResults(data) {
 
 async function loadDatasetStats() {
   try {
-    const res = await fetch('/api/dataset/stats');
+    const res = await fetch('/api/dataset/stats?_t=' + Date.now(), { cache: 'no-store' });
     if (!res.ok) throw new Error('Failed to fetch dataset stats');
     const stats = await res.json();
     state.datasetStats = stats;
 
-    DOM.hubTotalSamples.textContent = stats.total_samples.toLocaleString();
+    if (DOM.hubTotalSamples) {
+      DOM.hubTotalSamples.textContent = stats.total_samples.toLocaleString();
+    }
     if (DOM.hubDatasetSizeBadge) {
       DOM.hubDatasetSizeBadge.textContent = `${Math.round(stats.total_samples / 1000)}K+`;
     }
 
-    DOM.hubLegitBar.style.width = `${stats.legitimate_pct}%`;
-    DOM.hubPhishBar.style.width = `${stats.phishing_pct}%`;
-    DOM.hubLegitLabel.textContent = `Legitimate: ${stats.legitimate_pct}% (${stats.legitimate_count.toLocaleString()})`;
-    DOM.hubPhishLabel.textContent = `Phishing: ${stats.phishing_pct}% (${stats.phishing_count.toLocaleString()})`;
+    if (DOM.hubLegitBar && DOM.hubPhishBar) {
+      DOM.hubLegitBar.style.width = `${stats.legitimate_pct}%`;
+      DOM.hubPhishBar.style.width = `${stats.phishing_pct}%`;
+    }
+    if (DOM.hubLegitLabel) {
+      DOM.hubLegitLabel.textContent = `Legitimate: ${stats.legitimate_pct}% (${stats.legitimate_count.toLocaleString()})`;
+    }
+    if (DOM.hubPhishLabel) {
+      DOM.hubPhishLabel.textContent = `Phishing: ${stats.phishing_pct}% (${stats.phishing_count.toLocaleString()})`;
+    }
 
     const m = stats.metrics || {};
-    DOM.hubAccuracy.textContent = m.accuracy ? `${(m.accuracy * 100).toFixed(2)}%` : '99.33%';
-    DOM.hubRocAuc.textContent = m.roc_auc ? m.roc_auc.toFixed(4) : '0.9996';
-    DOM.hubLastTrained.textContent = `Last Trained: ${stats.last_trained}`;
+    if (DOM.hubAccuracy) {
+      DOM.hubAccuracy.textContent = m.accuracy ? `${(m.accuracy * 100).toFixed(2)}%` : '99.33%';
+    }
+    if (DOM.hubRocAuc) {
+      DOM.hubRocAuc.textContent = m.roc_auc ? m.roc_auc.toFixed(4) : '0.9996';
+    }
+    if (DOM.hubLastTrained) {
+      DOM.hubLastTrained.textContent = `Last Trained: ${stats.last_trained}`;
+    }
   } catch (err) {
     console.warn('Dataset stats error:', err);
   }
@@ -567,15 +581,48 @@ async function uploadDatasetFile(file) {
     const data = await res.json();
     if (!res.ok) throw new Error(data.detail || 'Upload failed');
 
+    // Immediately update UI counters from upload response
+    if (DOM.hubTotalSamples && data.total_dataset_size) {
+      DOM.hubTotalSamples.textContent = data.total_dataset_size.toLocaleString();
+    }
+
+    if (data.class_counts && data.total_dataset_size > 0) {
+      const legitPct = ((data.class_counts.legitimate / data.total_dataset_size) * 100).toFixed(1);
+      const phishPct = ((data.class_counts.phishing / data.total_dataset_size) * 100).toFixed(1);
+      if (DOM.hubLegitBar && DOM.hubPhishBar) {
+        DOM.hubLegitBar.style.width = `${legitPct}%`;
+        DOM.hubPhishBar.style.width = `${phishPct}%`;
+      }
+      if (DOM.hubLegitLabel) {
+        DOM.hubLegitLabel.textContent = `Legitimate: ${legitPct}% (${data.class_counts.legitimate.toLocaleString()})`;
+      }
+      if (DOM.hubPhishLabel) {
+        DOM.hubPhishLabel.textContent = `Phishing: ${phishPct}% (${data.class_counts.phishing.toLocaleString()})`;
+      }
+    }
+
+    let duplicateNotice = '';
+    if (data.rows_added === 0 && data.duplicates_ignored > 0) {
+      duplicateNotice = `<br><span style="color: #fbbf24; font-size: 0.85rem;">ℹ️ All ${data.duplicates_ignored} samples were already in the dataset. Deduplication skipped them to prevent duplicate training bias.</span>`;
+    }
+
     DOM.datasetUploadResult.innerHTML = `
-      <strong>Upload Success!</strong><br>
+      <strong>Upload Processed!</strong><br>
       • Rows parsed: <strong>${data.rows_parsed.toLocaleString()}</strong><br>
       • New unique rows added: <strong>${data.rows_added.toLocaleString()}</strong><br>
       • Duplicates ignored: <strong>${data.duplicates_ignored.toLocaleString()}</strong><br>
       • Total dataset size: <strong>${data.total_dataset_size.toLocaleString()} samples</strong>
+      ${duplicateNotice}
     `;
+
+    // Re-sync full stats in background
     loadDatasetStats();
-    showToast(`Successfully added ${data.rows_added} new records!`);
+
+    if (data.rows_added > 0) {
+      showToast(`Added ${data.rows_added} new records! Total dataset: ${data.total_dataset_size.toLocaleString()}`);
+    } else {
+      showToast(`Processed ${file.name}: ${data.duplicates_ignored} duplicate records skipped.`);
+    }
   } catch (err) {
     DOM.datasetUploadResult.textContent = `Upload Error: ${err.message}`;
     showToast(`Dataset Upload Failed: ${err.message}`);

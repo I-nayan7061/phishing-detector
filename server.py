@@ -459,7 +459,7 @@ async def dataset_stats():
     """Live telemetry for Dataset & Model Operations Hub."""
     try:
         stats = dataset_manager.get_dataset_statistics()
-        return stats
+        return JSONResponse(content=stats, headers={"Cache-Control": "no-cache, no-store, must-revalidate"})
     except Exception as e:
         logger.exception("Error reading dataset stats")
         raise HTTPException(status_code=500, detail=str(e))

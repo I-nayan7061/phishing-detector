@@ -1,0 +1,83 @@
+text,label
+"Subject: Urgent: Your Microsoft 365 Account Has Been Suspended!
+
+Dear User,
+We detected unusual sign-in activity on your Microsoft 365 account from an unrecognized device in St. Petersburg, Russia. For your protection, your access will be permanently terminated within 24 hours unless you verify your identity.
+Click here to confirm your credentials: http://microsoft-sec-verification.xyz/auth/login
+Microsoft Security Team",1
+"Subject: Sprint 24 Planning & Architecture Review
+
+Hi Team,
+Please find the agenda for tomorrow's Sprint 24 planning session attached below.
+We will review the backlog items, assign story points for the API redesign, and finalize sprint goals.
+Meeting Link: https://meet.google.com/abc-defg-hij
+Best regards,
+Alex Carter",0
+"Subject: ACTION REQUIRED: Overdue Invoice #INV-2026-8812
+
+Attention Accounts Payable,
+Please find the revised wire instructions for overdue invoice #INV-2026-8812. Our banking details have changed due to our annual audit.
+Transfer the outstanding balance of $14,850.00 USD immediately to avoid legal action.
+Download the payment remittance receipt: http://invoice-portal-download.top/receipt.pdf.exe
+Accounting Dept",1
+"Subject: Your Amazon Order #112-984218-0912 Has Shipped
+
+Hello Sarah,
+Your package containing 'Mechanical Keyboard - RGB Backlit' is on its way.
+Estimated delivery date: Thursday, October 1st.
+You can track your package directly inside your Amazon account order history.
+Thank you for shopping with Amazon.",0
+"Subject: Urgent: Wire Transfer Request - Confidential Acquisition
+
+Hey David,
+I am currently in an executive meeting and cannot take calls. We are finalizing an urgent vendor acquisition.
+Can you please initiate a domestic wire transfer of $45,000 to the attached beneficiary account right away?
+I will sign the formal documentation once I am out of the meeting. Keep this confidential.
+Mark Richardson, CEO",1
+"Subject: Weekly Security Patch Summary & Scheduled Downtime
+
+Team,
+This is a reminder that routine kernel security updates will be applied to our staging databases this Sunday between 02:00 UTC and 04:00 UTC.
+No impact is expected on production services. Please review the change ticket #SEC-4921 in Jira if you have questions.
+DevOps Operations",0
+"Subject: CONGRATULATIONS! You Have Won $2,500,000 USD In The International Lottery
+
+Dear Winner,
+Your email address was drawn as the winner in the International Global Sweepstakes Promo.
+To claim your lump-sum prize fund, kindly reply with your full name, residential address, direct phone number, and a copy of your passport or ID to claim-officer@lottery-payout-online.tk
+Dr. Patrick Walsh, Claims Coordinator",1
+"Subject: Code Review: Pull Request #142 - Add JWT authentication middleware
+
+Hi Kevin,
+I've reviewed your PR adding the JWT authentication middleware. Overall the architecture looks solid.
+I left a few minor comments regarding token expiry handling and refresh token rotation in the GitHub review.
+Please take a look when you have a moment.
+Thanks,
+Elena",0
+"Subject: Internal Revenue Service (IRS): Tax Refund Notification
+
+Dear Taxpayer,
+Our records indicate you are eligible for an unclaimed federal tax refund of $1,420.50 USD.
+To process your refund directly to your bank account, please complete our online verification form within 48 hours:
+http://irs-tax-refund-portal.click/verify
+Internal Revenue Service",1
+"Subject: Lunch & Learn: Introduction to Machine Learning Systems
+
+Hi everyone,
+Reminder that our engineering Lunch & Learn session is happening this Friday at 12:30 PM in Conference Room B.
+Topic: Building Explainable NLP Models with Support Vector Machines. Pizza and refreshments will be provided!
+RSVP by Wednesday so we can get an accurate headcount.
+Culture Committee",0
+"Subject: Security Alert: Unauthorized 2FA Code Request
+
+Your account two-factor authentication has been requested from an unrecognized browser.
+If this was not you, someone knows your password!
+Click immediately to lock your account and reset your password: http://account-secure-portal.info/lock?id=9821
+Do not ignore this warning.",1
+"Subject: Quarterly Financial Results - All Hands Presentation Slides
+
+Hi All,
+Thank you for attending today's Q3 company all-hands meeting.
+The presentation slides and recording have been uploaded to our internal Confluence space at https://wiki.corp.internal/q3-results.
+Feel free to reach out to the finance team if you have any follow-up questions.
+Finance & Executive Team",0

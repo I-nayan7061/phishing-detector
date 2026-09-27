@@ -1,0 +1,34 @@
+[
+  {
+    "text": "Subject: DHL Express: Shipment Delivery On Hold - Address Incomplete\n\nDear Customer,\n\nYour international package with tracking number #DHL-77192841 is currently held at our sorting facility because the delivery destination street number was missing.\n\nA customs clearance storage fee of $4.85 USD applies if not claimed within 48 hours.\n\nPlease confirm your address and pay the clearance charge here:\nhttp://dhl-express-redelivery-notice.top/address/update\n\nDHL Express Customer Service",
+    "label": 1
+  },
+  {
+    "text": "Subject: Your Uber Ride Receipt - Tuesday Evening\n\nThanks for riding with Uber, Chris!\n\nTrip Summary:\nDate: Tuesday, September 22, 2026\nDistance: 6.4 miles\nTotal Fare: $18.42 USD (Charged to Visa ending in 5521)\n\nA copy of this tax invoice has been saved to your account. You can view trip details or rate your driver in the Uber app.\n\nUber Technologies Inc.",
+    "label": 0
+  },
+  {
+    "text": "Subject: UPS Notification: Urgent Customs Clearance Surcharge Required\n\nParcel Notification:\n\nWe could not complete delivery for package #1Z9999999999999999 due to an unpaid customs duty fee of $12.30.\n\nTo prevent the package from being returned to the sender in Frankfurt, click below to pay the surcharge via our payment portal:\nhttp://ups-secure-tracking-portal.xyz/pay\n\nUPS Global Courier Operations",
+    "label": 1
+  },
+  {
+    "text": "Subject: Delta Air Lines: Your Flight Itinerary & E-Ticket Confirmation\n\nDear passenger,\n\nYour flight booking is confirmed! Confirmation code: DL-9921KA.\n\nFlight Details:\nDelta 1842: Atlanta (ATL) to Seattle (SEA)\nDeparture: October 12, 2026 at 08:35 AM EDT\nSeat: 14C (Main Cabin)\n\nYou can check in online starting 24 hours prior to departure via delta.com or the Fly Delta mobile app.\n\nDelta Air Lines",
+    "label": 0
+  },
+  {
+    "text": "Subject: Google Drive: 'Executive_Compensation_Review_2026.docx' shared with you\n\nGoogle Workspace Notification:\n\nArthur Vance (HR Executive) has shared an encrypted document with you via Google Drive:\n'Executive_Compensation_Review_2026.docx'\n\nTo view this file, sign in with your corporate email credentials to decrypt:\nhttp://gdrive-file-share-viewer.buzz/auth?doc=comp_2026\n\nGoogle Cloud Security",
+    "label": 1
+  },
+  {
+    "text": "Subject: Spotify: Your receipt for Spotify Premium Family subscription\n\nHi Alex,\n\nThanks for being a Spotify Premium Family subscriber! Here is your monthly payment confirmation:\n\nPlan: Premium Family (Up to 6 accounts)\nBilling Period: Sep 20 - Oct 20, 2026\nAmount: $16.99 USD (Paid via PayPal)\n\nYou can manage your family members and offline downloads in your account settings.\n\nThe Spotify Team",
+    "label": 0
+  },
+  {
+    "text": "Subject: Bank of America: Suspicious Card Swipe in São Paulo, Brazil\n\nSecurity Notice:\n\nWe blocked a card purchase of $1,249.00 USD at 'Electronics Megastore' in São Paulo, Brazil on your credit card ending in 9812.\n\nIf you did not make this purchase, your card is compromised. Click immediately to reverse the charge and order a replacement card:\nhttp://bofa-card-protection-alert.online/security/verify\n\nBank of America Fraud Department",
+    "label": 1
+  },
+  {
+    "text": "Subject: Weekly Standup Notes & Blockers - Platform Infrastructure\n\nHi Platform Engineers,\n\nHere is a quick recap of our weekly standup:\n- Maya: Finished deploying Postgres 16 read-replicas in us-east-1.\n- Liam: Benchmarking Kafka partition rebalancing under peak ingestion load.\n- Blockers: Awaiting IAM permissions approval for the new S3 analytics bucket.\n\nLet's keep up the great momentum.\nCheers,\nDavid Kim",
+    "label": 0
+  }
+]

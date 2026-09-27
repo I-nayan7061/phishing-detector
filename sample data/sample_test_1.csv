@@ -1,0 +1,62 @@
+text,label
+"Subject: CRITICAL: VPN Gateway Certificate Expired - Re-authenticate Now
+
+Dear Employee,
+Your remote corporate VPN profile certificate has expired as of midnight. You will lose access to all internal repositories, Jira, and Slack within 3 hours.
+To update your VPN profile and avoid disruption, re-authenticate via the global proxy server:
+http://corp-vpn-gateway-auth.net/cert/update
+Global Infrastructure Operations",1
+"Subject: Bi-Weekly Frontend Engineering Sync - Meeting Agenda
+
+Hi Everyone,
+Here is the agenda for our bi-weekly frontend team sync scheduled for tomorrow at 10:00 AM PST:
+1. Review migration progress to React 19 and Vite
+2. Discuss design system token consolidation
+3. Performance budget review for mobile web clients
+Meeting room: Building 3, Room 402 or via Zoom link on the calendar.
+Best,
+Marcus",0
+"Subject: Security Warning: Multiple Failed PIN Attempts on Debit Card
+
+Alert: We noticed 4 consecutive invalid PIN entries on your debit card ending in 4108 at an ATM in Bucharest, Romania.
+Your card has been locked to prevent fraudulent withdrawals.
+Verify your identity and unlock your card immediately by visiting:
+http://secure-bank-cardunlock.online/verify?id=4108
+Card Fraud Protection Team",1
+"Subject: GitHub: New comments on Pull Request #88: Add OAuth2 Token Refresh
+
+Hello Devs,
+Samantha left 3 comments on Pull Request #88 (Add OAuth2 Token Refresh):
+- 'Consider handling 401 Unauthorized edge cases when the refresh token itself expires.'
+- 'Looks good to merge once unit tests pass.'
+View the discussion directly on GitHub: https://github.com/company/backend-api/pull/88
+GitHub Notifications",0
+"Subject: Urgent: Your Apple ID Has Been Disabled For Security Reasons
+
+Dear Customer,
+Your Apple ID was used to sign in to iCloud via an unauthorized web browser in Shanghai, China.
+All iCloud backup syncing and App Store purchases have been paused.
+To restore your account and verify ownership, please sign in to our secure Apple ID validator:
+http://appleid-security-validator.xyz/recover
+Apple Customer Support",1
+"Subject: Jira Notification: Ticket #SEC-291 moved to Done
+
+Hi Team,
+Ticket #SEC-291 'Rotate production database SSL certificates' has been marked as Done by Robert Evans.
+Verification logs and checksums have been attached to the issue ticket in Jira.
+No further action is required from the engineering team.
+Jira Automated Dispatcher",0
+"Subject: Action Required: Mandatory Anti-Phishing Training Module Incomplete
+
+All Staff,
+Our compliance records indicate that you have failed to complete the mandatory Q3 Cybersecurity Awareness training module before the September deadline.
+Your company workstation will be quarantined from the internal LAN by 5:00 PM today unless you complete the training:
+http://compliance-portal-lms.top/training/start
+Cybersecurity Compliance Department",1
+"Subject: Office Policy Reminder: New Visitor Check-In Procedures
+
+Hi Team,
+Starting Monday, all guest visitors to our corporate offices must be pre-registered via the facilities portal at least 24 hours prior to arrival.
+Visitors will receive a digital QR badge on their phone for elevator access.
+Thank you for your cooperation in keeping our premises safe.
+Facilities & Workplace Experience",0

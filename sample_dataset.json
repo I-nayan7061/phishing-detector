@@ -1,0 +1,42 @@
+[
+  {
+    "text": "Subject: Critical Alert: Your PayPal Account Has Been Limited!\n\nDear Valued Customer,\n\nWe recently detected suspicious login attempts associated with your PayPal wallet. To protect your funds, we have temporarily restricted outgoing payments and withdrawals.\n\nTo restore full access, verify your billing address and credit card information immediately at:\nhttp://paypal-verification-center.xyz/secure/login\n\nIf you do not complete verification within 24 hours, your account will be permanently closed.\n\nPayPal Security Operations",
+    "label": 1
+  },
+  {
+    "text": "Subject: Monthly Engineering Newsletter - September Edition\n\nHi Engineering Team,\n\nWelcome to the September edition of our tech newsletter! In this issue:\n- Overview of our migration to Python 3.12 and FastAPI microservices\n- Best practices for feature engineering in text classification pipelines\n- Team spotlight: Congratulations to Priya for leading the CI/CD pipeline automation!\n\nRead the full newsletter on our internal Notion workspace.\n\nCheers,\nEngineering Operations Team",
+    "label": 0
+  },
+  {
+    "text": "Subject: FedEx Delivery Notification: Package Delivery Failed - Action Required\n\nAttention Recipient,\n\nOur courier was unable to deliver your parcel #FDX-9941829 today due to an incorrect delivery address.\n\nTo reschedule delivery and avoid a return-to-sender penalty fee of $15.00, update your shipping details and pay the redelivery surcharge here:\nhttp://fedex-parcel-redelivery.top/tracking/confirm\n\nFedEx Express Logistics",
+    "label": 1
+  },
+  {
+    "text": "Subject: Your Doctor's Appointment Confirmation - City Health Clinic\n\nDear Michael,\n\nThis is a friendly reminder that you have an upcoming appointment scheduled with Dr. Gupta:\nDate: Wednesday, October 7th at 10:30 AM\nLocation: City Health Clinic, Suite 400\n\nPlease arrive 10 minutes early to complete any necessary paperwork. If you need to reschedule or cancel, please call our office at least 24 hours in advance.\n\nCity Health Clinic Patient Portal",
+    "label": 0
+  },
+  {
+    "text": "Subject: Urgent: Payroll Direct Deposit Information Verification\n\nHello Team,\n\nDuring our recent HR software migration, several employee direct deposit bank records were flagged as incomplete. To ensure your upcoming paycheck is processed without delay, please log in to the employee portal and confirm your routing and bank account number:\n\nhttp://workday-hr-portal.online/payroll/verify\n\nFailure to verify before Friday 5:00 PM will result in your paycheck being delayed.\n\nHuman Resources & Payroll",
+    "label": 1
+  },
+  {
+    "text": "Subject: GitHub: New security advisory published for fast-json library\n\nHello,\n\nA new moderate severity security vulnerability has been reported in a repository you watch: 'fast-json-parser'.\nWe recommend reviewing the advisory GHSA-3829-x7x and bumping the dependency to version 2.4.1.\n\nFor details, check your repository security tab on GitHub.\n\nThe GitHub Security Team",
+    "label": 0
+  },
+  {
+    "text": "Subject: IT Support Notice: Password Expiry & Mandatory Portal Upgrade\n\nAll Staff,\n\nYour corporate network password will expire in 2 hours. In accordance with updated cyber hygiene policies, all active staff members must migrate to our new Single Sign-On (SSO) gateway.\n\nKeep your current password and extend access by authenticating here:\nhttp://sso-corporate-auth.buzz/login?user=staff\n\nIT Service Desk",
+    "label": 1
+  },
+  {
+    "text": "Subject: Hotel Reservation Confirmation - Grand Hyatt San Francisco\n\nDear Emily,\n\nThank you for choosing Grand Hyatt San Francisco. Your reservation is confirmed!\n\nConfirmation Number: GH-781920\nCheck-in: Friday, Nov 14, 2026 (3:00 PM)\nCheck-out: Sunday, Nov 16, 2026 (11:00 AM)\nRoom Type: King Deluxe City View\n\nWe look forward to welcoming you. You can manage your reservation or add special requests through your Hyatt World account.\n\nGrand Hyatt Reservations",
+    "label": 0
+  },
+  {
+    "text": "Subject: Netflix: Update your payment method to keep streaming\n\nHi Customer,\n\nWe had trouble processing your latest monthly subscription payment. Your membership is currently on hold.\n\nTo resume watching your favorite movies and TV shows, please update your billing details right away:\nhttp://netflix-billing-update.xyz/member/account\n\nWe're here to help if you have any questions.\n\nNetflix Customer Care",
+    "label": 1
+  },
+  {
+    "text": "Subject: Python Library Release: scikit-learn 1.4 Highlights & Migration Guide\n\nHi Scikit-learn Users,\n\nWe are pleased to announce the release of scikit-learn version 1.4! Key highlights include:\n- Faster linear models inference with improved BLAS bindings\n- Enhanced sparse matrix handling in TfidfVectorizer\n- Extended probability calibration diagnostic tools\n\nInstall via pip: `pip install -U scikit-learn`\nDetailed release notes are available on our documentation portal.\n\nThe Scikit-learn Maintainers",
+    "label": 0
+  }
+]

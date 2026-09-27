@@ -1,0 +1,34 @@
+[
+  {
+    "text": "Subject: LinkedIn: Senior Staff Software Architect position (Salary $240,000 - $310,000 USD)\n\nHi,\n\nI was very impressed with your background in machine learning and distributed systems! Our client, a high-growth AI unicorn in Palo Alto, is actively hiring a Senior Staff Architect.\n\nBecause this is a confidential search, please review the complete compensation package and submit your resume via our private recruiter portal:\nhttp://talent-recruitment-careers.click/apply?role=staff_ml\n\nBest regards,\nRachel Green, Senior Talent Partner",
+    "label": 1
+  },
+  {
+    "text": "Subject: Zoom: Recording for 'Q4 Product Roadmap All-Hands' is now available\n\nHi Product Team,\n\nThe cloud recording for the Q4 Product Roadmap All-Hands meeting on September 24 is now ready for viewing.\n\nTopic: Q4 Product Roadmap & Feature Prioritization\nDuration: 42 minutes\nAccess Recording: https://company.zoom.us/rec/play/7812904812\nPasscode: Roadmap2026!\n\nThe Zoom Team",
+    "label": 0
+  },
+  {
+    "text": "Subject: Urgent Zoom Security Notice: Meeting link rescheduled due to CVE exploit\n\nUrgent Meeting Update:\n\nThe link for your 11:30 AM client demonstration has been migrated due to a critical remote code execution vulnerability in the older Zoom client.\n\nJoin the secured conference room using our updated browser client:\nhttp://zoom-meetings-encrypted-auth.info/join?meeting_id=992817\n\nFailure to join via the secure gateway will prevent audio transmission.\nZoom IT Operations",
+    "label": 1
+  },
+  {
+    "text": "Subject: Slack: You have been invited to join the #ai-architecture channel\n\nHi,\n\nElena Rostova invited you to join the private Slack channel #ai-architecture in the 'Acme Engineering' workspace.\n\nChannel Topic: Technical RFC discussions for model inference latency optimization.\n\nOpen Slack to view the channel and start collaborating with the team.\n\nSlack Technologies LLC",
+    "label": 0
+  },
+  {
+    "text": "Subject: Microsoft Authenticator: Multiple Denied Approvals - Confirm Identity\n\nAlert:\n\nWe detected 15 rapid push notification denials from the Microsoft Authenticator app on your enrolled phone.\n\nSomeone may have access to your primary credentials and is attempting MFA fatigue bypass.\n\nTo lock your Active Directory credentials and safeguard your identity, click below immediately:\nhttp://mfa-authenticator-protect.top/security/lockout\n\nIdentity & Access Management (IAM)",
+    "label": 1
+  },
+  {
+    "text": "Subject: Google Calendar: 1-on-1 Catchup with Maya Patel (Weekly)\n\nGoogle Calendar Invitation:\n\nEvent: 1-on-1 Catchup with Maya Patel\nWhen: Every Thursday from 3:30 PM to 4:00 PM\nWhere: Google Meet (link in calendar event)\n\nAgenda:\n- Review sprint velocity\n- Discuss upcoming technical challenges\n- Career development check-in\n\nGoogle Calendar Notifications",
+    "label": 0
+  },
+  {
+    "text": "Subject: Dropbox: You received 3 files from 'accounting@partner-vendor.com'\n\nDropbox Transfer:\n\nA partner vendor has transferred 3 financial audit spreadsheets to you via Dropbox Transfer:\n- Q3_Balance_Sheet.xlsx\n- Vendor_Dispute_Log.xlsx\n- Wire_Confirmation.pdf.exe\n\nDownload expires in 24 hours. Sign in to your Dropbox account to access:\nhttp://dropbox-secure-transfer-files.online/download\n\nDropbox Support",
+    "label": 1
+  },
+  {
+    "text": "Subject: Confluence: Page 'API Gateway V2 Architecture RFC' was updated\n\nHi,\n\nSiddharth Rao updated the Confluence page 'API Gateway V2 Architecture RFC':\n- Added rate-limiting specifications with Redis token bucket algorithm\n- Updated sequence diagrams for external client authentication\n\nView the diff and comment on the page in Confluence: https://confluence.corp.internal/pages/rfc-gateway-v2\n\nAtlassian Confluence",
+    "label": 0
+  }
+]
